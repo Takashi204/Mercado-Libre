@@ -5,7 +5,7 @@ from selenium.webdriver.common.keys import Keys
 CHROME_DRIVER_PATH = 'C:\webdriver\chromedriver-win64'
 
 # Término de búsqueda
-search_query = 'iPhone'
+search_query = 'iPhone 12'
 
 # Configuración del navegador
 chrome_options = webdriver.ChromeOptions()

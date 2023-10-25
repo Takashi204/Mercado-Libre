@@ -30,11 +30,11 @@ search_box.send_keys(Keys.RETURN)
 driver.implicitly_wait(10)
 
 # Obtener los títulos de los productos encontrados
-product_titles = driver.find_elements(By.CLASS_NAME, 'ui-search-item__title')
+product_titles = driver.find_elements(By.CLASS_NAME, 'ui-search-item__title"')
 
 # Mostrar los títulos de los productos encontrados
 for title in product_titles:
     print(title.text)
 
 # Cerrar el navegador
-driver.quit()
+driver.close()
