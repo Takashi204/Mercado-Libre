@@ -10,8 +10,7 @@ CHROME_DRIVER_PATH = 'C:\webdriver\chromedriver-win64\chromedriver.exe'
 url = 'https://www.mercadolibre.cl/'
 
 
-# Término de búsqueda
-search_query = 'iphone 13'
+
 
 # Configuración del navegador
 chrome_options = webdriver.ChromeOptions()
@@ -22,14 +21,27 @@ driver = webdriver.Chrome(options=chrome_options)
 # Abrir Mercado Libre
 driver.get(url)
 
-# Encontrar el campo de búsqueda y escribir el término de búsqueda
+# Término de búsqueda con un máximo de 120 caracteres
+search_query = 'a' * 120  # Esto creará una cadena de 120 caracteres "a"
+
+# Encontrar el campo de búsqueda por su nombre
 search_box = driver.find_element(By.NAME, 'as_word')
+
+# Limitar el término de búsqueda a 120 caracteres
+search_query = search_query[:120]
+
+# Ingresar el término de búsqueda en el campo de búsqueda
 search_box.send_keys(search_query)
+
+# Realizar la búsqueda presionando la tecla Enter
 search_box.send_keys(Keys.RETURN)
 
 # Esperar a que se carguen los resultados (puedes ajustar este tiempo según sea necesario)
 #driver.implicitly_wait(10)
 time.sleep(20)
+
+
+
 
 # Cerrar el navegador
 driver.close()
