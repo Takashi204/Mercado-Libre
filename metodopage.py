@@ -1,59 +1,71 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import unittest
+from datetime import datetime
 
+class PruebaMercadoLibre(unittest.TestCase):
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+        self.driver.get('https://www.mercadolibre.cl')
 
-# Inicializar el navegador Chrome
-CHROME_DRIVER = 'C:\webdriver\chromedriver-win64\chromedriver.exe'
+    def test_medio_de_pago(self):
+        try:
+            search_box = self.driver.find_element(By.NAME, 'as_word')
+            search_box.send_keys('iPhone 13')
+            search_box.submit()
 
-url = 'https://www.mercadolibre.cl'
+            # Esperar hasta que los resultados de búsqueda estén presentes (máximo 10 segundos de espera)
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'ui-search-result__image'))
+            )
 
+            # Seleccionar el primer producto de los resultados de búsqueda
+            primer_producto = self.driver.find_element(By.CLASS_NAME, 'ui-search-result__image')
+            primer_producto.click()
 
-# Configuración del navegador
-chrome_options = webdriver.ChromeOptions()
+            # Esperar hasta que la página del producto se cargue completamente (máximo 10 segundos de espera)
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CLASS_NAME, 'ui-pdp-title'))
+            )
 
-# Inicializar el navegador
-driver = webdriver.Chrome(options=chrome_options)
+            # Hacer clic en "Ver medios de pago" usando un script de JavaScript
+            ver_medios_de_pago = self.driver.find_element(By.CLASS_NAME, "ui-pdp-action-modal__link")
+            self.driver.execute_script("arguments[0].click();", ver_medios_de_pago)
 
-# Abrir Mercado Libre
-driver.get(url)
-try:
-    # Encontrar el campo de búsqueda y buscar un producto (por ejemplo, "iPhone 13")
-    search_box = driver.find_element(By.NAME, 'as_word')
-    search_box.send_keys('iPhone 13')
-    search_box.submit()
+            # Esperar 15 segundos después de hacer clic en "Ver medios de pago"
+            time.sleep(15)
 
-    # Esperar hasta que los resultados de búsqueda estén presentes (máximo 10 segundos de espera)
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CLASS_NAME, 'ui-search-result__image'))
-    )
+            # Realizar otras acciones si es necesario
 
-    # Seleccionar el primer producto de los resultados de búsqueda
-    primer_producto = driver.find_element(By.CLASS_NAME, 'ui-search-result__image')
-    primer_producto.click()
+            self.assertTrue(True, "Búsqueda de producto exitosa.")
+        except Exception as e:
+            self.assertTrue(False, f"Error: {e}")
 
-    # Esperar hasta que la página del producto se cargue completamente (máximo 10 segundos de espera)
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CLASS_NAME, 'ui-pdp-title'))
-    )
+    def tearDown(self):
+        self.driver.quit()
 
-    # Esperar hasta que el enlace "Ver los medios de pago" esté presente en el DOM (máximo 10 segundos de espera)
-    boton_ver_medios_de_pago = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CLASS_NAME, 'ui-pdp-action-modal__link'))
-    )
+if __name__ == "__main__":
+    # Ejecutar las pruebas y generar un informe de texto
+    test_suite = unittest.TestLoader().loadTestsFromTestCase(PruebaMercadoLibre)
+    test_result = unittest.TextTestRunner(verbosity=2).run(test_suite)
 
-    # Hacer clic en el enlace "Ver los medios de pago"
-    boton_ver_medios_de_pago.click()
+    # Generar un informe de texto con la fecha y hora actual
+    now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    report_file = f"Informe_Prueba_{now}.txt"
 
+    with open(report_file, "w") as f:
+        f.write(f"Prueba realizada el {now}\n\n")
+        f.write(f"Resultado: {'Éxito' if test_result.wasSuccessful() else 'Fallo'}\n")
+        f.write(f"Total de pruebas: {test_result.testsRun}\n")
+        f.write(f"Pruebas exitosas: {test_result.testsRun - len(test_result.failures) - len(test_result.errors)}\n")
+        f.write(f"Pruebas fallidas: {len(test_result.failures)}\n")
+        f.write(f"Errores: {len(test_result.errors)}\n")
 
-    
-except Exception as e:
-    print(f'Error: {e}')
-
-
-time.sleep(15)
-
-driver.close()
+        if len(test_result.failures) > 0:
+            f.write("\nDetalles de las fallas:\n")
+            for failure in test_result.failures:
+                f.write(f"{failure[0]}\n")
+                f.write(f"{failure[1]}\n\n")
