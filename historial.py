@@ -1,45 +1,54 @@
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import unittest
+from datetime import datetime
 
+class PruebaMercadoLibre(unittest.TestCase):
+    def setUp(self):
+        self.driver = webdriver.Chrome()
+        self.driver.get('https://www.mercadolibre.cl')
 
-# Ruta al controlador de Chrome. Reemplázala con la ubicación de tu controlador.
-CHROME_DRIVER = 'C:\webdriver\chromedriver-win64\chromedriver.exe'
+    def test_historial_link(self):
+        try:
+            enlace_historial = WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href*="navigation#nav-header"]'))
+            )
+            enlace_historial.click()
 
-# URL de Mercado Libre
-url = 'https://www.mercadolibre.cl'
+            # Esperar 15 segundos después de hacer clic en el enlace "Historial"
+            time.sleep(15)
 
-# Configuración del navegador
-chrome_options = webdriver.ChromeOptions()
+            # Realizar otras acciones si es necesario
 
-# Inicializar el navegador
-driver = webdriver.Chrome(options=chrome_options)
+            self.assertTrue(True, "Clic en Historial exitoso.")
+        except Exception as e:
+            self.assertTrue(False, f"Error: {e}")
 
-# Abrir Mercado Libre
-driver.get(url)
+    def tearDown(self):
+        self.driver.quit()
 
-try:
-    # Encontrar el enlace "Historial" por su atributo href
-    enlace_historial = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href*="navigation#nav-header"]'))
-    )
+if __name__ == "__main__":
+    # Ejecutar las pruebas y generar un informe de texto
+    test_suite = unittest.TestLoader().loadTestsFromTestCase(PruebaMercadoLibre)
+    test_result = unittest.TextTestRunner(verbosity=2).run(test_suite)
 
-    # Hacer clic en el enlace "Historial"
-    enlace_historial.click()
+    # Generar un informe de texto con la fecha y hora actual
+    now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    report_file = f"Informe_Prueba_{now}.txt"
 
+    with open(report_file, "w") as f:
+        f.write(f"Prueba realizada el {now}\n\n")
+        f.write(f"Resultado: {'Éxito' if test_result.wasSuccessful() else 'Fallo'}\n")
+        f.write(f"Total de pruebas: {test_result.testsRun}\n")
+        f.write(f"Pruebas exitosas: {test_result.testsRun - len(test_result.failures) - len(test_result.errors)}\n")
+        f.write(f"Pruebas fallidas: {len(test_result.failures)}\n")
+        f.write(f"Errores: {len(test_result.errors)}\n")
 
-except Exception as e:
-    print(f'Error: {e}')
-
-
-
-
-
-
-
-time.sleep(15)
-
-driver.close()
+        if len(test_result.failures) > 0:
+            f.write("\nDetalles de las fallas:\n")
+            for failure in test_result.failures:
+                f.write(f"{failure[0]}\n")
+                f.write(f"{failure[1]}\n\n")
